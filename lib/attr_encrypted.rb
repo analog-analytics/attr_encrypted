@@ -191,6 +191,7 @@ module AttrEncrypted
   #   email = User.attr_encrypted_decrypt(:email, 'SOME_ENCRYPTED_EMAIL_STRING')
   def attr_encrypted_decrypt(attribute, encrypted_value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
+    options.each {|k,v| options[k]= evaluate_attr_encrypted_option(v)}
     if options[:if] && !options[:unless] && !encrypted_value.nil? && !(encrypted_value.is_a?(String) && encrypted_value.empty?)
       encrypted_value = encrypted_value.unpack(options[:encode]).first if options[:encode]
       value = options[:encryptor].send(options[:decrypt_method], options.merge!(:value => encrypted_value))
@@ -217,6 +218,7 @@ module AttrEncrypted
   #   encrypted_email = User.attr_encrypted_encrypt(:email, 'test@example.com')
   def attr_encrypted_encrypt(attribute, value, options = {})
     options = encrypted_attributes[attribute.to_sym].merge(options)
+    options.each {|k,v| options[k]= evaluate_attr_encrypted_option(v)}
     if options[:if] && !options[:unless] && !value.nil? && !(value.is_a?(String) && value.empty?)
       value = options[:marshal] ? options[:marshaler].send(options[:dump_method], value) : value.to_s
       encrypted_value = options[:encryptor].send(options[:encrypt_method], options.merge!(:value => value))
